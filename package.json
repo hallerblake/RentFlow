@@ -7,12 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "prisma db push",
-    "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:push": "node scripts/load-env.js prisma db push",
+    "db:generate": "node scripts/load-env.js prisma generate",
+    "db:studio": "node scripts/load-env.js prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
+    "dotenv": "^17.2.3",
     "next": "^16.0.1",
     "prisma": "^6.18.0",
     "react": "^19.2.0",

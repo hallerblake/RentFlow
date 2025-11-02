@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +8,141 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Core rental management models
+model Property {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  type        PropertyType
+  bedrooms    Int?
+  bathrooms   Float?
+  squareFeet  Int?
+  description String?
+
+  // Relationships
+  units       Unit[]
+  leases      Lease[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Unit {
+  id          String   @id @default(cuid())
+  propertyId  String
+  unitNumber  String
+  floor       Int?
+  bedrooms    Int?
+  bathrooms   Float?
+  squareFeet  Int?
+  rentAmount  Float
+
+  // Relationships
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  leases      Lease[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([propertyId, unitNumber])
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String   @unique
+  phone       String?
+
+  // Emergency contact
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  // Relationships
+  leases      Lease[]
+  payments    Payment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Lease {
+  id          String      @id @default(cuid())
+  propertyId  String
+  unitId      String?
+  tenantId    String
+
+  startDate   DateTime
+  endDate     DateTime
+  rentAmount  Float
+  deposit     Float
+  status      LeaseStatus @default(ACTIVE)
+
+  // Relationships
+  property    Property @relation(fields: [propertyId], references: [id])
+  unit        Unit?    @relation(fields: [unitId], references: [id])
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  payments    Payment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  leaseId     String
+  tenantId    String
+  amount      Float
+  dueDate     DateTime
+  paidDate    DateTime?
+  status      PaymentStatus @default(PENDING)
+  paymentType PaymentType   @default(RENT)
+  notes       String?
+
+  // Relationships
+  lease       Lease  @relation(fields: [leaseId], references: [id])
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Enums
+enum PropertyType {
+  SINGLE_FAMILY
+  MULTI_FAMILY
+  APARTMENT
+  CONDO
+  TOWNHOUSE
+  COMMERCIAL
+  OTHER
+}
+
+enum LeaseStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  PENDING
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  LATE
+  PARTIAL
+  FAILED
+}
+
+enum PaymentType {
+  RENT
+  DEPOSIT
+  LATE_FEE
+  UTILITY
+  MAINTENANCE
+  OTHER
 }
