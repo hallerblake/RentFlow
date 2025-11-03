@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Building2, MapPin, Bed, Bath, Square, DollarSign, Users, Wrench } from 'lucide-react';
+import { Plus, Building2, MapPin, Bed, Bath, Square, DollarSign, Users, Wrench, Edit, Trash2 } from 'lucide-react';
 import { PropertyDialog } from '@/components/properties/PropertyDialog';
 
 type Property = {
@@ -31,11 +31,20 @@ type Property = {
 };
 
 const statusColors = {
-  VACANT: 'bg-green-100 text-green-800',
-  OCCUPIED: 'bg-blue-100 text-blue-800',
-  MAINTENANCE: 'bg-orange-100 text-orange-800',
-  UNAVAILABLE: 'bg-gray-100 text-gray-800',
+  VACANT: 'bg-green-500/10 text-green-700 border-green-500/20',
+  OCCUPIED: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
+  MAINTENANCE: 'bg-orange-500/10 text-orange-700 border-orange-500/20',
+  UNAVAILABLE: 'bg-gray-500/10 text-gray-700 border-gray-500/20',
 };
+
+const gradients = [
+  'from-blue-500 to-purple-600',
+  'from-purple-500 to-pink-600',
+  'from-green-500 to-teal-600',
+  'from-orange-500 to-red-600',
+  'from-cyan-500 to-blue-600',
+  'from-indigo-500 to-purple-600',
+];
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -83,17 +92,19 @@ export default function PropertiesPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Properties</h1>
+      <div className="space-y-8 p-8">
+        <div className="space-y-2">
+          <div className="h-10 w-64 bg-white/50 rounded-lg animate-pulse" />
+          <div className="h-6 w-96 bg-white/30 rounded-lg animate-pulse" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="h-48 bg-gray-200" />
+            <Card key={i} className="glass shadow-premium overflow-hidden animate-pulse">
+              <div className="h-48 bg-gradient-to-br from-slate-200 to-slate-300" />
               <CardContent className="p-6 space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-white/50 rounded w-3/4" />
+                <div className="h-4 bg-white/50 rounded w-1/2" />
+                <div className="h-4 bg-white/50 rounded w-2/3" />
               </CardContent>
             </Card>
           ))}
@@ -103,113 +114,172 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Properties</h1>
-          <p className="text-gray-500 mt-1">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold gradient-text">
+            Properties
+          </h1>
+          <p className="text-lg text-muted-foreground">
             Manage your rental properties ({properties.length} total)
           </p>
         </div>
-        <Button onClick={() => { setSelectedProperty(null); setDialogOpen(true); }}>
+        <Button
+          onClick={() => { setSelectedProperty(null); setDialogOpen(true); }}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Property
         </Button>
       </div>
 
+      {/* Empty State */}
       {properties.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Building2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No properties yet</h3>
-          <p className="text-gray-500 mb-4">Get started by adding your first property</p>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Property
-          </Button>
+        <Card className="glass shadow-premium-lg border-0">
+          <CardContent className="p-16 text-center">
+            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-6">
+              <Building2 className="h-12 w-12 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">No properties yet</h3>
+            <p className="text-muted-foreground mb-8 text-lg">
+              Get started by adding your first rental property
+            </p>
+            <Button
+              onClick={() => setDialogOpen(true)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Add Property
+            </Button>
+          </CardContent>
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardHeader className="p-0">
-                <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative">
-                  <div className="absolute top-4 right-4">
-                    <Badge className={statusColors[property.status as keyof typeof statusColors]}>
-                      {property.status}
-                    </Badge>
-                  </div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-2xl font-bold mb-1">{property.name}</h3>
-                    <div className="flex items-center text-sm opacity-90">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {property.city}, {property.state}
+          {properties.map((property, index) => {
+            const gradient = gradients[index % gradients.length];
+            return (
+              <Card
+                key={property.id}
+                className="glass shadow-premium hover-lift border-0 overflow-hidden group"
+              >
+                {/* Property Image/Header */}
+                <CardHeader className="p-0 relative">
+                  <div className={`h-48 bg-gradient-to-br ${gradient} relative`}>
+                    {/* Status Badge */}
+                    <div className="absolute top-4 right-4">
+                      <Badge
+                        variant="outline"
+                        className={`${statusColors[property.status as keyof typeof statusColors]} backdrop-blur-sm font-semibold`}
+                      >
+                        {property.status}
+                      </Badge>
                     </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {property.address}
+
+                    {/* Property Name & Location */}
+                    <div className="absolute bottom-4 left-4 right-4 text-white">
+                      <h3 className="text-2xl font-bold mb-2 drop-shadow-lg">
+                        {property.name}
+                      </h3>
+                      <div className="flex items-center text-sm opacity-95 drop-shadow">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {property.city}, {property.state}
+                      </div>
                     </div>
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  </div>
+                </CardHeader>
+
+                {/* Property Details */}
+                <CardContent className="p-6 space-y-4">
+                  {/* Address */}
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    {property.address}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 py-4 border-y">
+                  {/* Property Stats */}
+                  <div className="grid grid-cols-3 gap-3 py-4 border-y border-white/20">
                     {property.bedrooms && (
-                      <div className="flex items-center gap-2">
-                        <Bed className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm font-medium">{property.bedrooms} bed</span>
+                      <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white/50 hover:bg-white/70 transition-colors">
+                        <Bed className="h-5 w-5 text-blue-600" />
+                        <span className="text-sm font-semibold">{property.bedrooms}</span>
+                        <span className="text-xs text-muted-foreground">beds</span>
                       </div>
                     )}
                     {property.bathrooms && (
-                      <div className="flex items-center gap-2">
-                        <Bath className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm font-medium">{property.bathrooms} bath</span>
+                      <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white/50 hover:bg-white/70 transition-colors">
+                        <Bath className="h-5 w-5 text-purple-600" />
+                        <span className="text-sm font-semibold">{property.bathrooms}</span>
+                        <span className="text-xs text-muted-foreground">baths</span>
                       </div>
                     )}
                     {property.squareFeet && (
-                      <div className="flex items-center gap-2">
-                        <Square className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm font-medium">{property.squareFeet} sqft</span>
+                      <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white/50 hover:bg-white/70 transition-colors">
+                        <Square className="h-5 w-5 text-green-600" />
+                        <span className="text-sm font-semibold">{property.squareFeet}</span>
+                        <span className="text-xs text-muted-foreground">sqft</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  {/* Rent Amount */}
+                  <div className="flex items-center justify-center p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20">
+                    <DollarSign className="h-6 w-6 text-green-600" />
+                    <span className="text-3xl font-bold text-green-600">
+                      {property.rentAmount.toLocaleString()}
+                    </span>
+                    <span className="text-lg text-green-600/70 ml-1">/mo</span>
+                  </div>
+
+                  {/* Tenants & Maintenance */}
+                  <div className="flex items-center justify-around gap-4 p-3 rounded-lg bg-white/50">
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                      <span className="text-2xl font-bold text-gray-900">
-                        ${property.rentAmount}
-                      </span>
-                      <span className="text-sm text-gray-500">/mo</span>
+                      <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <Users className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold">{property._count.tenants}</div>
+                        <div className="text-xs text-muted-foreground">Tenants</div>
+                      </div>
+                    </div>
+                    <div className="h-8 w-px bg-gray-300" />
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                        <Wrench className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold">{property._count.maintenanceRequests}</div>
+                        <div className="text-xs text-muted-foreground">Requests</div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>{property._count.tenants} tenants</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Wrench className="h-4 w-4" />
-                      <span>{property._count.maintenanceRequests} requests</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <Button variant="outline" className="flex-1" onClick={() => handleEdit(property)}>
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 bg-white/50 hover:bg-white/70 border-blue-500/30 hover:border-blue-500 transition-all duration-300"
+                      onClick={() => handleEdit(property)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700" onClick={() => handleDelete(property.id)}>
+                    <Button
+                      variant="outline"
+                      className="flex-1 bg-white/50 hover:bg-red-50 border-red-500/30 hover:border-red-500 text-red-600 hover:text-red-700 transition-all duration-300"
+                      onClick={() => handleDelete(property.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
