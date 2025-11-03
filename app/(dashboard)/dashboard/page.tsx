@@ -1,27 +1,76 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, Users, DollarSign, Wrench, TrendingUp, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+type DashboardStats = {
+  metrics: {
+    properties: number;
+    occupied: number;
+    revenue: number;
+    maintenance: number;
+    urgentMaintenance: number;
+  };
+  upcomingPayments: Array<{
+    id: string;
+    tenant: string;
+    property: string;
+    amount: number;
+    dueDate: string;
+  }>;
+  recentActivity: Array<{
+    id: string;
+    type: string;
+    message: string;
+    time: string;
+  }>;
+};
+
 export default function DashboardPage() {
-  // This will be replaced with real data from the database
-  const metrics = {
-    properties: 12,
-    occupied: 8,
-    revenue: 9600,
-    maintenance: 4,
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats');
+      const data = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentActivity = [
-    { id: 1, type: 'payment', message: 'Payment received from Tenant 1', time: '2 hours ago' },
-    { id: 2, type: 'maintenance', message: 'New maintenance request at Main Street Property', time: '5 hours ago' },
-    { id: 3, type: 'lease', message: 'Lease renewed for Oak Avenue Duplex', time: '1 day ago' },
-  ];
+  if (loading || !stats) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your properties</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-20 bg-gray-200 rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  const upcomingPayments = [
-    { id: 1, tenant: 'Tenant 1', property: 'Main Street Property', amount: 1200, dueDate: '2025-12-01' },
-    { id: 2, tenant: 'Tenant 3', property: 'Downtown Apartment', amount: 850, dueDate: '2025-12-01' },
-    { id: 3, tenant: 'Tenant 5', property: 'Main Street Property', amount: 1200, dueDate: '2025-12-01' },
-  ];
+  const occupancyRate = stats.metrics.properties > 0
+    ? Math.round((stats.metrics.occupied / stats.metrics.properties) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -40,10 +89,10 @@ export default function DashboardPage() {
             <Building2 className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{metrics.properties}</div>
+            <div className="text-2xl font-bold text-gray-900">{stats.metrics.properties}</div>
             <div className="flex items-center mt-1">
               <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-              <p className="text-xs text-green-600">+2 from last month</p>
+              <p className="text-xs text-green-600">{stats.metrics.occupied} occupied</p>
             </div>
           </CardContent>
         </Card>
@@ -56,9 +105,9 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{metrics.occupied}</div>
+            <div className="text-2xl font-bold text-gray-900">{stats.metrics.occupied}</div>
             <p className="text-xs text-gray-500 mt-1">
-              {Math.round((metrics.occupied / metrics.properties) * 100)}% occupancy rate
+              {occupancyRate}% occupancy rate
             </p>
           </CardContent>
         </Card>
@@ -71,10 +120,12 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">${metrics.revenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              ${stats.metrics.revenue.toLocaleString()}
+            </div>
             <div className="flex items-center mt-1">
               <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-              <p className="text-xs text-green-600">+12% from last month</p>
+              <p className="text-xs text-green-600">Current month</p>
             </div>
           </CardContent>
         </Card>
@@ -87,8 +138,10 @@ export default function DashboardPage() {
             <Wrench className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{metrics.maintenance}</div>
-            <p className="text-xs text-orange-600 mt-1">2 urgent items</p>
+            <div className="text-2xl font-bold text-gray-900">{stats.metrics.maintenance}</div>
+            <p className="text-xs text-orange-600 mt-1">
+              {stats.metrics.urgentMaintenance} urgent items
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -100,16 +153,20 @@ export default function DashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
+            {stats.recentActivity.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
+            ) : (
+              <div className="space-y-4">
+                {stats.recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -119,22 +176,28 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingPayments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-900">{payment.tenant}</p>
-                    <p className="text-xs text-gray-500">{payment.property}</p>
+            {stats.upcomingPayments.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">No upcoming payments</p>
+            ) : (
+              <div className="space-y-4">
+                {stats.upcomingPayments.map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-900">{payment.tenant}</p>
+                      <p className="text-xs text-gray-500">{payment.property}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-gray-900">
+                        ${payment.amount.toLocaleString()}
+                      </p>
+                      <Badge variant="outline" className="text-xs">
+                        {new Date(payment.dueDate).toLocaleDateString()}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">${payment.amount}</p>
-                    <Badge variant="outline" className="text-xs">
-                      {payment.dueDate}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

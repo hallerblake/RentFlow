@@ -159,9 +159,9 @@ model Lease {
 model Payment {
   id                 String        @id @default(cuid())
   companyId          String
-  leaseId            String
+  leaseId            String?
   tenantId           String
-  propertyId         String
+  propertyId         String?
   amount             Float
   dueDate            DateTime
   paidDate           DateTime?
@@ -172,10 +172,10 @@ model Payment {
   notes              String?
 
   // Relationships
-  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  lease    Lease    @relation(fields: [leaseId], references: [id])
-  tenant   Tenant   @relation(fields: [tenantId], references: [id])
-  property Property @relation(fields: [propertyId], references: [id])
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lease    Lease?    @relation(fields: [leaseId], references: [id])
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
