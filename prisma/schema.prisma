@@ -10,30 +10,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Core rental management models
-model Property {
-  id          String   @id @default(cuid())
-  name        String
-  address     String
-  city        String
-  state       String
-  zipCode     String
-  type        PropertyType
-  bedrooms    Int?
-  bathrooms   Float?
-  squareFeet  Int?
-  description String?
+// Multi-tenant: Companies
+model Company {
+  id       String @id @default(cuid())
+  name     String
+  email    String?
+  phone    String?
+  address  String?
+  settings String? // JSON for company-specific settings
 
   // Relationships
-  units       Unit[]
-  leases      Lease[]
+  users               User[]
+  properties          Property[]
+  tenants             Tenant[]
+  payments            Payment[]
+  maintenanceRequests MaintenanceRequest[]
+  smsReminders        SmsReminder[]
+  smsTemplates        SmsTemplate[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Users with role-based access
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique // Clerk user ID
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  role      UserRole @default(VIEWER)
+  companyId String?
+
+  // Relationships
+  company Company? @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Core rental management models
+model Property {
+  id             String         @id @default(cuid())
+  companyId      String
+  name           String
+  address        String
+  city           String
+  state          String
+  zipCode        String
+  type           PropertyType
+  bedrooms       Int?
+  bathrooms      Float?
+  squareFeet     Int?
+  rentAmount     Float
+  depositAmount  Float?
+  status         PropertyStatus @default(VACANT)
+  images         String? // JSON array of image URLs
+  description    String?
+
+  // Relationships
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  units               Unit[]
+  leases              Lease[]
+  tenants             Tenant[]
+  maintenanceRequests MaintenanceRequest[]
+  payments            Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Unit {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   propertyId  String
   unitNumber  String
   floor       Int?
@@ -43,76 +91,167 @@ model Unit {
   rentAmount  Float
 
   // Relationships
-  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  leases      Lease[]
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  leases   Lease[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([propertyId, unitNumber])
 }
 
 model Tenant {
-  id          String   @id @default(cuid())
-  firstName   String
-  lastName    String
-  email       String   @unique
-  phone       String?
+  id         String  @id @default(cuid())
+  companyId  String
+  propertyId String? // Current property
+  firstName  String
+  lastName   String
+  email      String
+  phone      String
+
+  // Lease info
+  leaseStartDate DateTime?
+  leaseEndDate   DateTime?
+  rentAmount     Float?
+  depositPaid    Float?
+  isActive       Boolean @default(true)
 
   // Emergency contact
   emergencyContactName  String?
   emergencyContactPhone String?
+  notes                 String?
 
   // Relationships
-  leases      Lease[]
-  payments    Payment[]
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  property            Property?            @relation(fields: [propertyId], references: [id])
+  leases              Lease[]
+  payments            Payment[]
+  maintenanceRequests MaintenanceRequest[]
+  smsReminders        SmsReminder[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, email])
 }
 
 model Lease {
-  id          String      @id @default(cuid())
-  propertyId  String
-  unitId      String?
-  tenantId    String
-
-  startDate   DateTime
-  endDate     DateTime
-  rentAmount  Float
-  deposit     Float
-  status      LeaseStatus @default(ACTIVE)
+  id         String      @id @default(cuid())
+  propertyId String
+  unitId     String?
+  tenantId   String
+  startDate  DateTime
+  endDate    DateTime
+  rentAmount Float
+  deposit    Float
+  status     LeaseStatus @default(ACTIVE)
 
   // Relationships
-  property    Property @relation(fields: [propertyId], references: [id])
-  unit        Unit?    @relation(fields: [unitId], references: [id])
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  payments    Payment[]
+  property Property @relation(fields: [propertyId], references: [id])
+  unit     Unit?    @relation(fields: [unitId], references: [id])
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  payments Payment[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Payment {
-  id          String        @id @default(cuid())
-  leaseId     String
-  tenantId    String
-  amount      Float
-  dueDate     DateTime
-  paidDate    DateTime?
-  status      PaymentStatus @default(PENDING)
-  paymentType PaymentType   @default(RENT)
-  notes       String?
+  id                 String        @id @default(cuid())
+  companyId          String
+  leaseId            String
+  tenantId           String
+  propertyId         String
+  amount             Float
+  dueDate            DateTime
+  paidDate           DateTime?
+  status             PaymentStatus @default(PENDING)
+  paymentMethod      String? // cash, check, ach, card
+  confirmationNumber String?
+  paymentType        PaymentType   @default(RENT)
+  notes              String?
 
   // Relationships
-  lease       Lease  @relation(fields: [leaseId], references: [id])
-  tenant      Tenant @relation(fields: [tenantId], references: [id])
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lease    Lease    @relation(fields: [leaseId], references: [id])
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Maintenance Management
+model MaintenanceRequest {
+  id           String              @id @default(cuid())
+  companyId    String
+  propertyId   String
+  tenantId     String?
+  title        String
+  description  String
+  priority     MaintenancePriority @default(MEDIUM)
+  status       MaintenanceStatus   @default(REQUESTED)
+  assignedTo   String? // Vendor/contractor name
+  estimatedCost Float?
+  actualCost   Float?
+  images       String? // JSON array of image URLs
+  completedAt  DateTime?
+  notes        String?
+
+  // Relationships
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  property Property  @relation(fields: [propertyId], references: [id])
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// SMS System
+model SmsReminder {
+  id           String    @id @default(cuid())
+  companyId    String
+  tenantId     String
+  phoneNumber  String
+  message      String
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  status       String? // scheduled, sent, failed, delivered
+  twilioSid    String?
+  reminderType String? // payment_due, payment_overdue, lease_renewal, maintenance_update
+  relatedId    String? // ID of related payment or maintenance request
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model SmsTemplate {
+  id           String  @id @default(cuid())
+  companyId    String?
+  name         String
+  templateType String // payment_due, payment_overdue, etc.
+  message      String
+  isActive     Boolean @default(true)
+  daysBefore   Int? // For scheduled reminders
+
+  // Relationships
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Enums
+enum UserRole {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  PROPERTY_MANAGER
+  VIEWER
+}
+
 enum PropertyType {
   SINGLE_FAMILY
   MULTI_FAMILY
@@ -121,6 +260,13 @@ enum PropertyType {
   TOWNHOUSE
   COMMERCIAL
   OTHER
+}
+
+enum PropertyStatus {
+  VACANT
+  OCCUPIED
+  MAINTENANCE
+  UNAVAILABLE
 }
 
 enum LeaseStatus {
@@ -133,9 +279,8 @@ enum LeaseStatus {
 enum PaymentStatus {
   PENDING
   PAID
-  LATE
-  PARTIAL
-  FAILED
+  OVERDUE
+  CANCELLED
 }
 
 enum PaymentType {
@@ -145,4 +290,18 @@ enum PaymentType {
   UTILITY
   MAINTENANCE
   OTHER
+}
+
+enum MaintenanceStatus {
+  REQUESTED
+  IN_PROGRESS
+  COMPLETED
+  CLOSED
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
