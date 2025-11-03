@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    // Test database connection first
+    await prisma.$connect();
+
     // Get total properties count
     const propertiesCount = await prisma.property.count();
 
@@ -157,11 +160,20 @@ export async function GET() {
       recentActivity,
     });
   } catch (error) {
-    console.error('[DASHBOARD_STATS_GET]', error);
+    console.error('[DASHBOARD_STATS_GET] Error:', error);
+    console.error('[DASHBOARD_STATS_GET] Error details:', JSON.stringify(error, null, 2));
+
+    // Return a more detailed error for debugging
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: process.env.NODE_ENV === 'development' ? error : undefined
+      },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
