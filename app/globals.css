@@ -4,45 +4,45 @@
 
 @layer base {
   :root {
-    /* Financial Trust Color System */
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    /* Modern Professional Color System */
+    --background: 220 15% 97%;
+    --foreground: 220 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 220 20% 15%;
 
-    /* Navy Blue - Primary Trust Color */
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
+    /* Indigo Blue - Modern Primary */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Emerald Green - Financial Success */
-    --secondary: 160 84% 39%;
+    /* Cyan - Modern Accent */
+    --secondary: 189 94% 43%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 10% 46%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 279 81% 67%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 11%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 239 84% 67%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Premium Financial Gradients */
-    --gradient-navy: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-    --gradient-emerald: linear-gradient(135deg, #059669 0%, #10B981 100%);
-    --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-    --gradient-blue: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-    --gradient-slate: linear-gradient(135deg, #475569 0%, #64748B 100%);
+    /* Modern Vibrant Gradients */
+    --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    --gradient-cyan: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+    --gradient-emerald: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
+    --gradient-rose: linear-gradient(135deg, #F43F5E 0%, #EC4899 100%);
+    --gradient-amber: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
   }
 
   .dark {
@@ -78,8 +78,8 @@
 
 @layer base {
   body {
-    background-color: #f8fafc;
-    color: hsl(222, 47%, 11%);
+    background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+    color: hsl(220, 20%, 15%);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
     font-feature-settings: 'cv11' 1, 'ss01' 1;
     font-optical-sizing: auto;
@@ -88,16 +88,17 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    letter-spacing: -0.025em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
   }
 
-  h1 { font-size: 2.25rem; }
-  h2 { font-size: 1.875rem; }
-  h3 { font-size: 1.5rem; }
-  h4 { font-size: 1.25rem; }
-  h5 { font-size: 1.125rem; }
-  h6 { font-size: 1rem; }
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.75rem; }
+  h4 { font-size: 1.5rem; }
+  h5 { font-size: 1.25rem; }
+  h6 { font-size: 1.125rem; }
 }
 
 @layer utilities {
@@ -105,81 +106,142 @@
     text-wrap: balance;
   }
 
-  /* Financial Professional Card Styles */
+  /* Modern Card Styles */
+  .modern-card {
+    background-color: white;
+    border: 1px solid rgb(226 232 240 / 0.6);
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modern-card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    border-color: rgb(203 213 225 / 0.8);
+    transform: translateY(-2px);
+  }
+
+  .modern-card-elevated {
+    background-color: white;
+    border: 1px solid rgb(226 232 240 / 0.6);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  }
+
+  /* Keep old names for compatibility */
   .financial-card {
     background-color: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid rgb(226 232 240 / 0.6);
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .financial-card:hover {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    border-color: #cbd5e1;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    border-color: rgb(203 213 225 / 0.8);
+    transform: translateY(-2px);
   }
 
   .financial-card-elevated {
     background-color: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(226 232 240 / 0.6);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
   }
 
-  /* Premium Gradients */
-  .gradient-navy {
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  /* Modern Vibrant Gradients */
+  .gradient-primary {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  }
+
+  .gradient-cyan {
+    background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
   }
 
   .gradient-emerald {
-    background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+    background: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
   }
 
-  .gradient-gold {
-    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  .gradient-rose {
+    background: linear-gradient(135deg, #F43F5E 0%, #EC4899 100%);
+  }
+
+  .gradient-amber {
+    background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+  }
+
+  /* Keep old names for compatibility */
+  .gradient-navy {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
   }
 
   .gradient-blue {
-    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+    background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
   }
 
-  .gradient-slate {
-    background: linear-gradient(135deg, #475569 0%, #64748B 100%);
+  .gradient-gold {
+    background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
   }
 
-  /* Gradient Text - Financial Brand */
-  .gradient-text-navy {
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  /* Gradient Text */
+  .gradient-text-primary {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-text-cyan {
+    background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .gradient-text-emerald {
-    background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+    background: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .gradient-text-gold {
-    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  /* Keep old names for compatibility */
+  .gradient-text-navy {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Professional Shadows */
+  /* Modern Soft Shadows */
+  .shadow-modern {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  }
+
+  .shadow-modern-md {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  }
+
+  .shadow-modern-lg {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  }
+
+  .shadow-modern-xl {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+  }
+
+  /* Keep old names for compatibility */
   .shadow-financial {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
   }
 
   .shadow-financial-lg {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
   }
 
   .shadow-financial-xl {
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
   }
 
   /* Smooth Professional Transitions */
