@@ -27,12 +27,12 @@ async function main() {
   console.log('Creating super admin user...');
   const superAdmin = await prisma.user.create({
     data: {
-      clerkId: 'placeholder_clerk_id', // Will be updated after Clerk setup
       email: 'haller.blake@gmail.com',
+      name: 'Blake Haller',
       firstName: 'Blake',
       lastName: 'Haller',
       role: 'SUPER_ADMIN',
-      companyId: null, // Super admin has access to all companies
+      isActive: true,
     },
   });
   console.log(`✅ Created super admin: ${superAdmin.email}`);
