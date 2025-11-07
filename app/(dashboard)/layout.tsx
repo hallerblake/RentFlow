@@ -1,5 +1,5 @@
-import { Sidebar } from '@/components/layout/Sidebar';
-import { TopBar } from '@/components/layout/TopBar';
+import Sidebar from '@/components/layout/Sidebar';
+import Header from '@/components/layout/Header';
 import { CompanyProvider } from '@/lib/contexts/CompanyContext';
 import { CompanyLoader } from '@/components/company/CompanyLoader';
 
@@ -11,17 +11,12 @@ export default function DashboardLayout({
   return (
     <CompanyProvider>
       <CompanyLoader />
-      <div className="flex h-screen overflow-hidden bg-slate-50">
-        {/* Sidebar */}
+      <div className="flex h-screen bg-slate-50">
         <Sidebar />
-
-        {/* Main Content */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <TopBar />
-          <main className="flex-1 overflow-y-auto bg-slate-50">
-            <div className="p-8 max-w-[1920px] mx-auto">
-              {children}
-            </div>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            {children}
           </main>
         </div>
       </div>
