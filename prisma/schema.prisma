@@ -20,7 +20,7 @@ model Company {
   settings String? // JSON for company-specific settings
 
   // Relationships
-  users               User[]
+  userAssignments     UserCompany[]
   properties          Property[]
   tenants             Tenant[]
   payments            Payment[]
@@ -39,14 +39,28 @@ model User {
   email     String   @unique
   firstName String?
   lastName  String?
-  role      UserRole @default(VIEWER)
-  companyId String?
+  role      UserRole @default(USER)
+  isActive  Boolean  @default(true)
 
   // Relationships
-  company Company? @relation(fields: [companyId], references: [id])
+  companyAssignments UserCompany[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Many-to-many relationship for users and companies
+model UserCompany {
+  id        String @id @default(cuid())
+  userId    String
+  companyId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, companyId])
 }
 
 // Core rental management models
@@ -248,8 +262,7 @@ model SmsTemplate {
 enum UserRole {
   SUPER_ADMIN
   COMPANY_ADMIN
-  PROPERTY_MANAGER
-  VIEWER
+  USER
 }
 
 enum PropertyType {

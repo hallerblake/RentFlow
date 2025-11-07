@@ -6,12 +6,14 @@ import {
   LayoutDashboard,
   Building2,
   Users,
+  UserCog,
   DollarSign,
   Wrench,
   MessageSquare,
   Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCurrentUser } from '@/lib/contexts/UserContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -20,11 +22,21 @@ const navigation = [
   { name: 'Payments', href: '/payments', icon: DollarSign, badge: 3 },
   { name: 'Maintenance', href: '/maintenance', icon: Wrench, badge: 2 },
   { name: 'SMS', href: '/sms', icon: MessageSquare },
+  { name: 'Users', href: '/users', icon: UserCog, adminOnly: true },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isSuperAdmin, isCompanyAdmin } = useCurrentUser();
+
+  // Filter navigation items based on user role
+  const filteredNavigation = navigation.filter((item) => {
+    if ('adminOnly' in item && item.adminOnly) {
+      return isSuperAdmin || isCompanyAdmin;
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-screen w-64 bg-white border-r border-slate-200">
@@ -58,7 +70,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-        {navigation.map((item) => {
+        {filteredNavigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useCurrentUser } from './UserContext';
 
 interface Company {
   id: string;
@@ -22,27 +23,48 @@ interface CompanyContextType {
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children }: { children: React.ReactNode }) {
+  const { currentUser, isSuperAdmin } = useCurrentUser();
   const [selectedCompany, setSelectedCompanyState] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Filter companies based on user role
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+
+  useEffect(() => {
+    if (!currentUser || companies.length === 0) {
+      setFilteredCompanies([]);
+      return;
+    }
+
+    if (isSuperAdmin) {
+      // Super admins see all companies
+      setFilteredCompanies(companies);
+    } else {
+      // Company admins and users see only their assigned companies
+      const assignedCompanyIds = currentUser.companyAssignments.map((ca) => ca.companyId);
+      const assigned = companies.filter((c) => assignedCompanyIds.includes(c.id));
+      setFilteredCompanies(assigned);
+    }
+  }, [currentUser, companies, isSuperAdmin]);
+
   // Load selected company from localStorage on mount
   useEffect(() => {
     const savedCompanyId = localStorage.getItem('selectedCompanyId');
-    if (savedCompanyId && companies.length > 0) {
-      const company = companies.find(c => c.id === savedCompanyId);
+    if (savedCompanyId && filteredCompanies.length > 0) {
+      const company = filteredCompanies.find(c => c.id === savedCompanyId);
       if (company) {
         setSelectedCompanyState(company);
-      } else if (companies.length > 0) {
+      } else if (filteredCompanies.length > 0) {
         // If saved company not found, select first available
-        setSelectedCompanyState(companies[0]);
+        setSelectedCompanyState(filteredCompanies[0]);
       }
-    } else if (companies.length > 0 && !selectedCompany) {
+    } else if (filteredCompanies.length > 0 && !selectedCompany) {
       // Auto-select first company if none selected
-      setSelectedCompanyState(companies[0]);
+      setSelectedCompanyState(filteredCompanies[0]);
     }
     setIsLoading(false);
-  }, [companies]);
+  }, [filteredCompanies]);
 
   const setSelectedCompany = (company: Company | null) => {
     setSelectedCompanyState(company);
@@ -58,7 +80,7 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
       value={{
         selectedCompany,
         setSelectedCompany,
-        companies,
+        companies: filteredCompanies,
         setCompanies,
         isLoading,
         setIsLoading,

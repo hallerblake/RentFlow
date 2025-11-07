@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useCompany } from '@/lib/contexts/CompanyContext';
 
 type Property = {
   id: string;
@@ -56,6 +57,7 @@ const gradients = [
 ];
 
 export default function PropertiesPage() {
+  const { selectedCompany } = useCompany();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -63,11 +65,16 @@ export default function PropertiesPage() {
   const [view, setView] = useState<'card' | 'table'>('card');
 
   useEffect(() => {
-    fetchProperties();
     // Load view preference from localStorage
     const savedView = localStorage.getItem('propertiesView') as 'card' | 'table';
     if (savedView) setView(savedView);
   }, []);
+
+  useEffect(() => {
+    if (selectedCompany) {
+      fetchProperties();
+    }
+  }, [selectedCompany]);
 
   const handleViewChange = (newView: 'card' | 'table') => {
     setView(newView);
@@ -75,8 +82,11 @@ export default function PropertiesPage() {
   };
 
   const fetchProperties = async () => {
+    if (!selectedCompany) return;
+
     try {
-      const response = await fetch('/api/properties');
+      setLoading(true);
+      const response = await fetch(`/api/properties?companyId=${selectedCompany.id}`);
       const data = await response.json();
 
       // Ensure data is an array before setting

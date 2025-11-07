@@ -1,6 +1,15 @@
 'use client';
 
-import { Search, Bell, ChevronDown } from 'lucide-react';
+import { Search, Bell, ChevronDown, User, Settings, HelpCircle, LogOut } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { CompanySwitcher } from '@/components/company/CompanySwitcher';
 
 export default function Header() {
   return (
@@ -24,17 +33,68 @@ export default function Header() {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
           </button>
 
-          {/* User menu */}
-          <button className="flex items-center gap-3 px-3 py-2 hover:bg-slate-100 rounded-lg transition-colors">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">BH</span>
-            </div>
-            <div className="hidden md:block text-left">
-              <p className="text-sm font-medium text-slate-900">Blake Haller</p>
-              <p className="text-xs text-slate-500">Admin</p>
-            </div>
-            <ChevronDown className="w-4 h-4 text-slate-400" />
-          </button>
+          {/* User menu dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-3 px-3 py-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">BH</span>
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-medium text-slate-900">Blake Haller</p>
+                  <p className="text-xs text-slate-500">Admin</p>
+                </div>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 p-3" align="end">
+              {/* User Info Header */}
+              <div className="flex items-center gap-3 px-2 py-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold">BH</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-900">Blake Haller</p>
+                  <p className="text-xs text-slate-500 truncate">blake@example.com</p>
+                </div>
+              </div>
+
+              <DropdownMenuSeparator />
+
+              {/* Company Switcher */}
+              <div className="py-2">
+                <DropdownMenuLabel className="text-xs font-semibold text-slate-600 uppercase tracking-wide px-2 mb-2">
+                  Current Company
+                </DropdownMenuLabel>
+                <CompanySwitcher />
+              </div>
+
+              <DropdownMenuSeparator />
+
+              {/* Menu Items */}
+              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
+                <User className="w-4 h-4 text-slate-600" />
+                <span className="text-sm">My Profile</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
+                <Settings className="w-4 h-4 text-slate-600" />
+                <span className="text-sm">Account Settings</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
+                <HelpCircle className="w-4 h-4 text-slate-600" />
+                <span className="text-sm">Help & Support</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md text-red-600 hover:text-red-700 hover:bg-red-50">
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm font-medium">Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
