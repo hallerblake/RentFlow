@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CompanySwitcher } from '@/components/company/CompanySwitcher';
 
 export function TopBar() {
   return (
@@ -108,21 +109,10 @@ export function TopBar() {
 
             <DropdownMenuSeparator />
 
-            {/* Company Info */}
+            {/* Company Switcher */}
             <div className="px-3 py-2 mb-2">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Current Company</p>
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200">
-                <div className="h-8 w-8 rounded-lg gradient-emerald flex items-center justify-center flex-shrink-0">
-                  <Building2 className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">Sherman Haller</p>
-                  <p className="text-xs text-slate-500 flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    555-0100
-                  </p>
-                </div>
-              </div>
+              <CompanySwitcher />
             </div>
 
             <DropdownMenuSeparator />

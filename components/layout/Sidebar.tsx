@@ -19,6 +19,7 @@ import {
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useCompany } from '@/lib/contexts/CompanyContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, badge: null },
@@ -33,6 +34,7 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { selectedCompany } = useCompany();
 
   return (
     <aside
@@ -69,17 +71,17 @@ export function Sidebar() {
       </div>
 
       {/* Company/User Info Bar */}
-      {!collapsed && (
+      {!collapsed && selectedCompany && (
         <div className="px-4 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50">
           <div className="flex items-center gap-3 p-3 rounded-lg bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-sm">
             <div className="h-10 w-10 rounded-lg gradient-emerald flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">Sherman Haller</p>
+              <p className="text-sm font-semibold text-slate-900 truncate">{selectedCompany.name}</p>
               <p className="text-xs text-slate-500 flex items-center gap-1">
                 <TrendingUp className="h-3 w-3" />
-                12 Active Properties
+                {selectedCompany.phone || 'No phone'}
               </p>
             </div>
           </div>
