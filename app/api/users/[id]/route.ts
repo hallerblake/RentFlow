@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/users/[id] - Get user by ID (admin only)
@@ -8,9 +8,9 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const clerkUser = await currentUser();
+    const session = await auth();
 
-    if (!clerkUser) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { id: session.user.id },
     });
 
     if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
@@ -71,9 +71,9 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const clerkUser = await currentUser();
+    const session = await auth();
 
-    if (!clerkUser) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -81,7 +81,7 @@ export async function PATCH(
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { id: session.user.id },
     });
 
     if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
@@ -173,9 +173,9 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const clerkUser = await currentUser();
+    const session = await auth();
 
-    if (!clerkUser) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -183,7 +183,7 @@ export async function DELETE(
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { id: session.user.id },
     });
 
     if (!dbUser || dbUser.role !== 'SUPER_ADMIN') {

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/users - List all users (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const clerkUser = await currentUser();
+    const session = await auth();
 
-    if (!clerkUser) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     // Get current user from database to check role
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { id: session.user.id },
     });
 
     if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
@@ -75,9 +75,9 @@ export async function GET(request: NextRequest) {
 // POST /api/users - Create a new user (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const clerkUser = await currentUser();
+    const session = await auth();
 
-    if (!clerkUser) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     // Get current user from database to check role
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { id: session.user.id },
     });
 
     if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {

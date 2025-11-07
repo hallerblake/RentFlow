@@ -34,19 +34,71 @@ model Company {
 
 // Users with role-based access
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique // Clerk user ID
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  role      UserRole @default(USER)
-  isActive  Boolean  @default(true)
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
 
-  // Relationships
+  // Custom fields for our app
+  firstName     String?
+  lastName      String?
+  role          UserRole  @default(USER)
+  isActive      Boolean   @default(true)
+
+  // Auth.js relationships
+  accounts      Account[]
+  sessions      Session[]
+
+  // Our app relationships
   companyAssignments UserCompany[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Auth.js Account model (for OAuth)
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+// Auth.js Session model
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Auth.js Verification Token model (for email verification)
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 // Many-to-many relationship for users and companies
