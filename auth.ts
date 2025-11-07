@@ -9,6 +9,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   callbacks: {
@@ -43,14 +44,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async signIn({ user, account, profile }) {
-      // Check if this is the first time the user is signing in
+      if (!user.email) return true;
+
+      // Check if user exists
       const existingUser = await prisma.user.findUnique({
-        where: { email: user.email! },
+        where: { email: user.email },
       });
 
-      // If user doesn't exist yet, create them with appropriate role
-      if (!existingUser && user.email) {
-        // Blake Haller gets Super Admin role
+      // If user exists, update their role and profile info
+      if (existingUser) {
+        const role = user.email === 'haller.blake@gmail.com' ? 'SUPER_ADMIN' : existingUser.role;
+
+        await prisma.user.update({
+          where: { email: user.email },
+          data: {
+            role,
+            firstName: profile?.given_name || existingUser.firstName,
+            lastName: profile?.family_name || existingUser.lastName,
+            name: user.name || existingUser.name,
+          },
+        });
+      }
+      // If user doesn't exist, PrismaAdapter will create them, but we need to set the role
+      else {
+        // This runs after PrismaAdapter creates the user
         const role = user.email === 'haller.blake@gmail.com' ? 'SUPER_ADMIN' : 'USER';
 
         await prisma.user.update({
@@ -59,7 +76,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             role,
             firstName: profile?.given_name,
             lastName: profile?.family_name,
-            name: user.name,
           },
         });
       }
