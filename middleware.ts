@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server';
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isAuthRoute = req.nextUrl.pathname.startsWith('/api/auth') ||
-                      req.nextUrl.pathname.startsWith('/sign-in');
+                      req.nextUrl.pathname.startsWith('/sign-in') ||
+                      req.nextUrl.pathname.startsWith('/api/test-env');
 
   // Allow auth routes without authentication
   if (isAuthRoute) {
