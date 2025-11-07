@@ -1,7 +1,5 @@
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
-import { CompanyProvider } from '@/lib/contexts/CompanyContext';
-import { CompanyLoader } from '@/components/company/CompanyLoader';
 
 export default function DashboardLayout({
   children,
@@ -9,17 +7,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <CompanyProvider>
-      <CompanyLoader />
-      <div className="flex h-screen bg-slate-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
-        </div>
+    <div className="flex h-screen bg-slate-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
       </div>
-    </CompanyProvider>
+    </div>
   );
 }

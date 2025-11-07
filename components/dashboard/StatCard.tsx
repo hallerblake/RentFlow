@@ -22,24 +22,24 @@ export default function StatCard({
 }: StatCardProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
-      {/* Icon with colored background */}
+      {/* Icon with colored background - THIS IS REQUIRED */}
       <div className="flex items-start justify-between mb-4">
         <div className={`${iconBgColor} ${iconColor} p-3 rounded-lg`}>
           <Icon className="w-6 h-6" />
         </div>
       </div>
 
-      {/* Title */}
+      {/* Title - small and subtle */}
       <p className="text-sm font-medium text-slate-600 mb-1">
         {title}
       </p>
 
-      {/* Big bold value */}
+      {/* Big bold value - THIS MUST BE LARGE */}
       <p className="text-3xl font-bold text-slate-900 mb-3">
         {typeof value === 'number' ? value.toLocaleString() : value}
       </p>
 
-      {/* Trend indicator */}
+      {/* Trend indicator with icon and color */}
       {change && (
         <div className="flex items-center gap-1.5 text-sm">
           {change.type === 'increase' ? (

@@ -6,7 +6,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 h-16 bg-white border-b border-slate-200">
       <div className="flex items-center justify-between h-full px-6">
-        {/* Search */}
+        {/* Search bar */}
         <div className="relative max-w-md w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
