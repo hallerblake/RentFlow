@@ -42,43 +42,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async signIn({ user, account, profile }) {
-      if (!user.email) return true;
-
-      // Check if user exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-      });
-
-      // If user exists, update their role and profile info
-      if (existingUser) {
-        const role = user.email === 'haller.blake@gmail.com' ? 'SUPER_ADMIN' : existingUser.role;
-
-        await prisma.user.update({
-          where: { email: user.email },
-          data: {
-            role,
-            firstName: profile?.given_name || existingUser.firstName,
-            lastName: profile?.family_name || existingUser.lastName,
-            name: user.name || existingUser.name,
-          },
-        });
-      }
-      // If user doesn't exist, PrismaAdapter will create them, but we need to set the role
-      else {
-        // This runs after PrismaAdapter creates the user
-        const role = user.email === 'haller.blake@gmail.com' ? 'SUPER_ADMIN' : 'USER';
-
-        await prisma.user.update({
-          where: { email: user.email },
-          data: {
-            role,
-            firstName: profile?.given_name,
-            lastName: profile?.family_name,
-          },
-        });
-      }
-
+    async signIn({ user, profile }) {
+      // Allow sign in
       return true;
     },
   },
