@@ -17,37 +17,37 @@ import { CompanySwitcher } from '@/components/company/CompanySwitcher';
 
 export function TopBar() {
   return (
-    <header className="sticky top-0 z-50 flex h-20 items-center justify-between border-b border-slate-200/60 bg-gradient-to-r from-white via-indigo-50/30 to-purple-50/30 backdrop-blur-xl px-8 shadow-modern-md">
+    <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8 shadow-sm">
       {/* Page Title & Breadcrumb Area */}
       <div className="flex items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold gradient-text-primary tracking-tight">Dashboard</h2>
-          <p className="text-sm text-slate-600 mt-1 font-medium">Welcome back, Blake</p>
+          <h2 className="text-xl font-bold text-slate-900">Dashboard</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Welcome back, Blake</p>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="flex items-center flex-1 max-w-2xl mx-8">
+      <div className="flex items-center flex-1 max-w-xl mx-8">
         <div className="relative w-full">
-          <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-indigo-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             type="search"
             placeholder="Search properties, tenants, payments..."
-            className="pl-14 pr-20 h-14 bg-white border-indigo-100 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 rounded-2xl text-sm shadow-modern hover:shadow-modern-md transition-all duration-300 font-medium"
+            className="pl-10 pr-16 h-10 bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm"
           />
-          <kbd className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-7 select-none items-center gap-1.5 rounded-lg border border-indigo-200 bg-gradient-to-br from-white to-indigo-50 px-2.5 font-mono text-xs font-semibold text-indigo-600 shadow-sm">
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border border-slate-300 bg-slate-50 px-2 font-mono text-xs text-slate-600">
             <span>⌘</span>K
           </kbd>
         </div>
       </div>
 
       {/* Actions & User Menu */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         {/* Help Button */}
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-12 w-12 rounded-2xl hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 transition-all duration-300 hover:scale-105 shadow-modern hover:shadow-modern-md"
+          className="h-9 w-9 rounded-lg hover:bg-slate-100 text-slate-600"
         >
           <HelpCircle className="h-5 w-5" />
         </Button>
@@ -56,52 +56,50 @@ export function TopBar() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-12 w-12 rounded-2xl hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 transition-all duration-300 hover:scale-105 shadow-modern hover:shadow-modern-md"
+          className="relative h-9 w-9 rounded-lg hover:bg-slate-100 text-slate-600"
         >
           <Bell className="h-5 w-5" />
           <Badge
             variant="destructive"
-            className="absolute -top-1.5 -right-1.5 h-5 w-5 p-0 flex items-center justify-center text-[10px] font-bold shadow-md animate-pulse"
+            className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] font-bold"
           >
             5
           </Badge>
         </Button>
 
         {/* Divider */}
-        <div className="h-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent mx-2" />
+        <div className="h-8 w-px bg-slate-200 mx-2" />
 
         {/* User Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-14 gap-3 px-4 rounded-2xl hover:bg-indigo-50 transition-all duration-300 hover:scale-105 shadow-modern hover:shadow-modern-md"
+              className="h-10 gap-2 px-3 rounded-lg hover:bg-slate-100"
             >
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-indigo-200 ring-2 ring-indigo-50 shadow-md">
-                  <AvatarFallback className="gradient-primary text-white font-bold text-sm">
-                    BH
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-bold text-slate-900 leading-none truncate max-w-[120px]">Blake Haller</span>
-                  <span className="text-xs text-indigo-600 leading-none mt-1 font-semibold">Super Admin</span>
-                </div>
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="gradient-primary text-white font-semibold text-xs">
+                  BH
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium text-slate-900 leading-none">Blake Haller</span>
+                <span className="text-xs text-slate-500 leading-none mt-0.5">Admin</span>
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80 p-3 rounded-2xl shadow-modern-xl border-slate-200/60" align="end" forceMount>
+          <DropdownMenuContent className="w-72 p-2 rounded-lg" align="end" forceMount>
             {/* User Info Header */}
-            <div className="flex items-center gap-3 p-4 mb-3 rounded-2xl bg-gradient-to-br from-indigo-50 via-purple-50 to-cyan-50 border border-indigo-100 shadow-modern">
-              <Avatar className="h-14 w-14 border-3 border-white ring-2 ring-indigo-100 shadow-md">
-                <AvatarFallback className="gradient-primary text-white font-bold text-base">
+            <div className="flex items-center gap-3 p-3 mb-2 rounded-lg bg-slate-50">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="gradient-primary text-white font-semibold">
                   BH
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-900 truncate">Blake Haller</p>
-                <p className="text-xs text-slate-600 truncate flex items-center gap-1.5 mt-1 font-medium">
-                  <Mail className="h-3.5 w-3.5 text-indigo-500" />
+                <p className="text-sm font-semibold text-slate-900 truncate">Blake Haller</p>
+                <p className="text-xs text-slate-600 truncate flex items-center gap-1 mt-0.5">
+                  <Mail className="h-3 w-3" />
                   haller.blake@gmail.com
                 </p>
               </div>
@@ -110,32 +108,32 @@ export function TopBar() {
             <DropdownMenuSeparator />
 
             {/* Company Switcher */}
-            <div className="px-2 py-2 mb-2">
-              <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2 px-1">Current Company</p>
+            <div className="px-2 py-2 mb-1">
+              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Current Company</p>
               <CompanySwitcher />
             </div>
 
-            <DropdownMenuSeparator className="my-2" />
+            <DropdownMenuSeparator />
 
             {/* Menu Items */}
-            <DropdownMenuItem className="cursor-pointer p-3.5 rounded-xl hover:bg-indigo-50 transition-all duration-200">
-              <User className="mr-3 h-4 w-4 text-indigo-600" />
-              <span className="font-semibold text-slate-700">My Profile</span>
+            <DropdownMenuItem className="cursor-pointer p-2.5 rounded-md hover:bg-slate-100">
+              <User className="mr-2 h-4 w-4 text-slate-600" />
+              <span className="font-medium text-slate-700">My Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer p-3.5 rounded-xl hover:bg-indigo-50 transition-all duration-200">
-              <Settings className="mr-3 h-4 w-4 text-indigo-600" />
-              <span className="font-semibold text-slate-700">Account Settings</span>
+            <DropdownMenuItem className="cursor-pointer p-2.5 rounded-md hover:bg-slate-100">
+              <Settings className="mr-2 h-4 w-4 text-slate-600" />
+              <span className="font-medium text-slate-700">Account Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer p-3.5 rounded-xl hover:bg-indigo-50 transition-all duration-200">
-              <HelpCircle className="mr-3 h-4 w-4 text-indigo-600" />
-              <span className="font-semibold text-slate-700">Help & Support</span>
+            <DropdownMenuItem className="cursor-pointer p-2.5 rounded-md hover:bg-slate-100">
+              <HelpCircle className="mr-2 h-4 w-4 text-slate-600" />
+              <span className="font-medium text-slate-700">Help & Support</span>
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator className="my-2" />
+            <DropdownMenuSeparator />
 
-            <DropdownMenuItem className="cursor-pointer p-3.5 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 focus:text-rose-700 focus:bg-rose-50 transition-all duration-200">
-              <LogOut className="mr-3 h-4 w-4" />
-              <span className="font-semibold">Log out</span>
+            <DropdownMenuItem className="cursor-pointer p-2.5 rounded-md text-rose-600 hover:text-rose-700 hover:bg-rose-50 focus:text-rose-700 focus:bg-rose-50">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span className="font-medium">Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

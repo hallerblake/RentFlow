@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Modern Professional Color System */
+    /* Professional Blue/Teal Color System */
     --background: 220 15% 97%;
     --foreground: 220 20% 15%;
 
@@ -14,18 +14,18 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 15%;
 
-    /* Indigo Blue - Modern Primary */
-    --primary: 239 84% 67%;
+    /* Blue - Primary */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Cyan - Modern Accent */
-    --secondary: 189 94% 43%;
+    /* Teal - Accent */
+    --secondary: 172 80% 40%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 15% 95%;
     --muted-foreground: 220 10% 46%;
 
-    --accent: 279 81% 67%;
+    --accent: 172 80% 40%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -33,13 +33,13 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 239 84% 67%;
+    --ring: 217 91% 60%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    /* Modern Vibrant Gradients */
-    --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-    --gradient-cyan: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+    /* Professional Gradients - Blue/Teal */
+    --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    --gradient-teal: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
     --gradient-emerald: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
     --gradient-rose: linear-gradient(135deg, #F43F5E 0%, #EC4899 100%);
     --gradient-amber: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
@@ -106,11 +106,11 @@
     text-wrap: balance;
   }
 
-  /* Modern Card Styles */
+  /* Modern Card Styles - Professional Border Radius */
   .modern-card {
     background-color: white;
     border: 1px solid rgb(226 232 240 / 0.6);
-    border-radius: 1.25rem;
+    border-radius: 0.75rem;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -124,7 +124,7 @@
   .modern-card-elevated {
     background-color: white;
     border: 1px solid rgb(226 232 240 / 0.6);
-    border-radius: 1.25rem;
+    border-radius: 0.75rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
   }
 
@@ -132,7 +132,7 @@
   .financial-card {
     background-color: white;
     border: 1px solid rgb(226 232 240 / 0.6);
-    border-radius: 1.25rem;
+    border-radius: 0.75rem;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -146,17 +146,21 @@
   .financial-card-elevated {
     background-color: white;
     border: 1px solid rgb(226 232 240 / 0.6);
-    border-radius: 1.25rem;
+    border-radius: 0.75rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
   }
 
-  /* Modern Vibrant Gradients */
+  /* Professional Gradients - Blue/Teal System */
   .gradient-primary {
-    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  }
+
+  .gradient-teal {
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
   }
 
   .gradient-cyan {
-    background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
   }
 
   .gradient-emerald {
@@ -173,27 +177,34 @@
 
   /* Keep old names for compatibility */
   .gradient-navy {
-    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   }
 
   .gradient-blue {
-    background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   }
 
   .gradient-gold {
     background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
   }
 
-  /* Gradient Text */
+  /* Gradient Text - Blue/Teal System */
   .gradient-text-primary {
-    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-text-teal {
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .gradient-text-cyan {
-    background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -208,7 +219,7 @@
 
   /* Keep old names for compatibility */
   .gradient-text-navy {
-    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
