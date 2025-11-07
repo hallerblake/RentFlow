@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { authenticateWithGoogle } from './actions';
+import Link from 'next/link';
 
 export default function SignInPage() {
   return (
@@ -14,9 +14,8 @@ export default function SignInPage() {
           <p className="text-slate-600">Sign in to manage your rental properties</p>
         </div>
 
-        <form action={authenticateWithGoogle}>
+        <Link href="/api/auth/signin/google?callbackUrl=/dashboard">
           <Button
-            type="submit"
             className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 shadow-sm"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -39,7 +38,7 @@ export default function SignInPage() {
             </svg>
             Sign in with Google
           </Button>
-        </form>
+        </Link>
 
         <p className="text-center text-sm text-slate-500 mt-6">
           By signing in, you agree to our Terms of Service and Privacy Policy
