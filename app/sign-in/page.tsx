@@ -1,6 +1,6 @@
-import { signIn } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { authenticateWithGoogle } from './actions';
 
 export default function SignInPage() {
   return (
@@ -14,12 +14,7 @@ export default function SignInPage() {
           <p className="text-slate-600">Sign in to manage your rental properties</p>
         </div>
 
-        <form
-          action={async () => {
-            'use server';
-            await signIn('google', { redirectTo: '/dashboard' });
-          }}
-        >
+        <form action={authenticateWithGoogle}>
           <Button
             type="submit"
             className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 shadow-sm"
