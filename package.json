@@ -8,10 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "db:push": "node scripts/load-env.js prisma db push",
-    "db:generate": "node scripts/load-env.js prisma generate",
-    "db:studio": "node scripts/load-env.js prisma studio",
-    "db:seed": "node scripts/load-env.js tsx prisma/seed.ts"
+    "db:validate": "node scripts/validate-db.js",
+    "db:push": "node scripts/validate-db.js && node scripts/load-env.js prisma db push",
+    "db:generate": "node scripts/validate-db.js && node scripts/load-env.js prisma generate",
+    "db:studio": "node scripts/validate-db.js && node scripts/load-env.js prisma studio",
+    "db:seed": "node scripts/validate-db.js && node scripts/load-env.js tsx prisma/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.34.1",

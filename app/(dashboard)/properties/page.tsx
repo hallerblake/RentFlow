@@ -6,6 +6,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Building2, MapPin, Bed, Bath, Square, DollarSign, Users, Wrench, Edit, Trash2 } from 'lucide-react';
 import { PropertyDialog } from '@/components/properties/PropertyDialog';
+import { ViewToggle } from '@/components/ui/view-toggle';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 type Property = {
   id: string;
@@ -51,18 +60,35 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [view, setView] = useState<'card' | 'table'>('card');
 
   useEffect(() => {
     fetchProperties();
+    // Load view preference from localStorage
+    const savedView = localStorage.getItem('propertiesView') as 'card' | 'table';
+    if (savedView) setView(savedView);
   }, []);
+
+  const handleViewChange = (newView: 'card' | 'table') => {
+    setView(newView);
+    localStorage.setItem('propertiesView', newView);
+  };
 
   const fetchProperties = async () => {
     try {
       const response = await fetch('/api/properties');
       const data = await response.json();
-      setProperties(data);
+
+      // Ensure data is an array before setting
+      if (Array.isArray(data)) {
+        setProperties(data);
+      } else {
+        console.error('API returned non-array data:', data);
+        setProperties([]);
+      }
     } catch (error) {
       console.error('Failed to fetch properties:', error);
+      setProperties([]);
     } finally {
       setLoading(false);
     }
@@ -125,13 +151,16 @@ export default function PropertiesPage() {
             Manage your rental properties ({properties.length} total)
           </p>
         </div>
-        <Button
-          onClick={() => { setSelectedProperty(null); setDialogOpen(true); }}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Property
-        </Button>
+        <div className="flex items-center gap-3">
+          <ViewToggle view={view} onViewChange={handleViewChange} />
+          <Button
+            onClick={() => { setSelectedProperty(null); setDialogOpen(true); }}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Property
+          </Button>
+        </div>
       </div>
 
       {/* Empty State */}
@@ -154,7 +183,7 @@ export default function PropertiesPage() {
             </Button>
           </CardContent>
         </Card>
-      ) : (
+      ) : view === 'card' ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {properties.map((property, index) => {
             const gradient = gradients[index % gradients.length];
@@ -281,6 +310,107 @@ export default function PropertiesPage() {
             );
           })}
         </div>
+      ) : (
+        <Card className="glass shadow-premium border-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-slate-200">
+                <TableHead className="font-semibold">Property</TableHead>
+                <TableHead className="font-semibold">Location</TableHead>
+                <TableHead className="font-semibold">Type</TableHead>
+                <TableHead className="font-semibold">Beds/Baths</TableHead>
+                <TableHead className="font-semibold">Rent</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Tenants</TableHead>
+                <TableHead className="font-semibold text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {properties.map((property) => (
+                <TableRow key={property.id} className="border-slate-200">
+                  <TableCell className="font-medium">
+                    <div>
+                      <div className="font-semibold text-slate-900">{property.name}</div>
+                      <div className="text-sm text-slate-500">{property.address}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm text-slate-600">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {property.city}, {property.state}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-slate-600">{property.type.replace('_', ' ')}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3 text-sm text-slate-600">
+                      {property.bedrooms && (
+                        <div className="flex items-center gap-1">
+                          <Bed className="h-3 w-3" />
+                          {property.bedrooms}
+                        </div>
+                      )}
+                      {property.bathrooms && (
+                        <div className="flex items-center gap-1">
+                          <Bath className="h-3 w-3" />
+                          {property.bathrooms}
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-semibold text-green-600">
+                      ${property.rentAmount.toLocaleString()}/mo
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={`${statusColors[property.status as keyof typeof statusColors]} font-semibold`}
+                    >
+                      {property.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center gap-1 text-slate-600">
+                        <Users className="h-3 w-3" />
+                        {property._count.tenants}
+                      </div>
+                      <div className="flex items-center gap-1 text-orange-600">
+                        <Wrench className="h-3 w-3" />
+                        {property._count.maintenanceRequests}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(property)}
+                        className="h-8 bg-white/50 hover:bg-white/70"
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(property.id)}
+                        className="h-8 bg-white/50 hover:bg-red-50 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
       )}
 
       <PropertyDialog
