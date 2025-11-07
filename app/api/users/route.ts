@@ -97,10 +97,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { clerkId, email, firstName, lastName, role, isActive, companyIds } = body;
+    const { email, name, firstName, lastName, role, isActive, companyIds } = body;
 
     // Validate required fields
-    if (!clerkId || !email) {
+    if (!email) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -119,8 +119,8 @@ export async function POST(request: NextRequest) {
     const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
-          clerkId,
           email,
+          name: name || `${firstName || ''} ${lastName || ''}`.trim() || null,
           firstName,
           lastName,
           role: role || 'USER',
