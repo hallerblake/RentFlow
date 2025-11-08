@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       where: { id: session.userId },
       select: {
         id: true,
-        passwordHash: true,
+        password: true,
       },
     });
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password!);
 
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Update password
     await prisma.user.update({
       where: { id: session.userId },
-      data: { passwordHash: hashedPassword },
+      data: { password: hashedPassword },
     });
 
     return NextResponse.json({ message: 'Password changed successfully' });
