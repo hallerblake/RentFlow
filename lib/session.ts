@@ -6,6 +6,8 @@ export interface SessionData {
   email: string;
   name?: string;
   image?: string;
+  role?: string;
+  selectedCompanyId?: string;
   isLoggedIn: boolean;
 }
 

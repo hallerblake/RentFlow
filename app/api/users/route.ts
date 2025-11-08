@@ -1,167 +1,52 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 
-// GET /api/users - List all users (admin only)
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const session = await auth();
+    const session = await getSession();
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Get current user from database to check role
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
-
-    if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    const searchParams = request.nextUrl.searchParams;
-    const companyId = searchParams.get('companyId');
-
-    // Super admins can see all users, company admins see only their company's users
-    let where = {};
-    if (dbUser.role === 'COMPANY_ADMIN' || companyId) {
-      where = {
-        companyAssignments: {
-          some: {
-            companyId: companyId || undefined,
-          },
-        },
-      };
-    }
-
-    const users = await prisma.user.findMany({
-      where,
-      include: {
-        companyAssignments: {
-          include: {
-            company: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return NextResponse.json(users);
-  } catch (error) {
-    console.error('[USERS_GET]', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    // Only SUPER_ADMIN can access user management
+    const users = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT id, email, name, role FROM "User" WHERE id = $1 LIMIT 1`,
+      session.userId
     );
-  }
-}
 
-// POST /api/users - Create a new user (admin only)
-export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    if (!users || users.length === 0 || users[0].role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Get current user from database to check role
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
+    // Fetch all users with their company assignments
+    const allUsers = await prisma.$queryRawUnsafe<any[]>(`
+      SELECT
+        u.id,
+        u.email,
+        u.name,
+        u.role,
+        u."isActive",
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'company', json_build_object(
+                'id', c.id,
+                'name', c.name
+              )
+            ) ORDER BY c.name
+          ) FILTER (WHERE c.id IS NOT NULL),
+          '[]'
+        ) as "companyAssignments"
+      FROM "User" u
+      LEFT JOIN "UserCompany" uc ON u.id = uc."userId"
+      LEFT JOIN "Company" c ON uc."companyId" = c.id
+      GROUP BY u.id, u.email, u.name, u.role, u."isActive"
+      ORDER BY u.email
+    `);
 
-    if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    const body = await request.json();
-    const { email, name, firstName, lastName, role, isActive, companyIds } = body;
-
-    // Validate required fields
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Company admins cannot create super admins
-    if (dbUser.role === 'COMPANY_ADMIN' && role === 'SUPER_ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden: Cannot create super admin' },
-        { status: 403 }
-      );
-    }
-
-    // Create user and company assignments in a transaction
-    const user = await prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
-        data: {
-          email,
-          name: name || `${firstName || ''} ${lastName || ''}`.trim() || null,
-          firstName,
-          lastName,
-          role: role || 'USER',
-          isActive: isActive !== undefined ? isActive : true,
-        },
-      });
-
-      // Create company assignments if provided
-      if (companyIds && companyIds.length > 0) {
-        await tx.userCompany.createMany({
-          data: companyIds.map((companyId: string) => ({
-            userId: newUser.id,
-            companyId,
-          })),
-        });
-      }
-
-      return await tx.user.findUnique({
-        where: { id: newUser.id },
-        include: {
-          companyAssignments: {
-            include: {
-              company: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-            },
-          },
-        },
-      });
-    });
-
-    return NextResponse.json(user, { status: 201 });
+    return NextResponse.json(allUsers);
   } catch (error) {
-    console.error('[USERS_POST]', error);
+    console.error('[USERS_GET_ERROR]', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: 'Failed to fetch users' },
       { status: 500 }
     );
   }

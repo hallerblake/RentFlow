@@ -1,218 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 
-// GET /api/users/[id] - Get user by ID (admin only)
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
-
-    if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    const { id } = await context.params;
-
-    const user = await prisma.user.findUnique({
-      where: { id },
-      include: {
-        companyAssignments: {
-          include: {
-            company: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(user);
-  } catch (error) {
-    console.error('[USER_GET]', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
-  }
-}
-
-// PATCH /api/users/[id] - Update user (admin only)
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
-
-    if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'COMPANY_ADMIN')) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
-    }
-
     const { id } = await context.params;
-    const body = await request.json();
-    const { firstName, lastName, role, isActive, companyIds } = body;
+    const session = await getSession();
 
-    // Company admins cannot modify super admins
-    const targetUser = await prisma.user.findUnique({ where: { id } });
-    if (
-      dbUser.role === 'COMPANY_ADMIN' &&
-      (targetUser?.role === 'SUPER_ADMIN' || role === 'SUPER_ADMIN')
-    ) {
-      return NextResponse.json(
-        { error: 'Forbidden: Cannot modify super admin' },
-        { status: 403 }
-      );
-    }
-
-    // Update user and company assignments in a transaction
-    const user = await prisma.$transaction(async (tx) => {
-      // Update user basic fields
-      await tx.user.update({
-        where: { id },
-        data: {
-          firstName,
-          lastName,
-          role,
-          isActive,
-        },
-      });
-
-      // Update company assignments if provided
-      if (companyIds !== undefined) {
-        // Remove all existing assignments
-        await tx.userCompany.deleteMany({
-          where: { userId: id },
-        });
-
-        // Create new assignments
-        if (companyIds.length > 0) {
-          await tx.userCompany.createMany({
-            data: companyIds.map((companyId: string) => ({
-              userId: id,
-              companyId,
-            })),
-          });
-        }
-      }
-
-      return await tx.user.findUnique({
-        where: { id },
-        include: {
-          companyAssignments: {
-            include: {
-              company: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-            },
-          },
-        },
-      });
-    });
-
-    return NextResponse.json(user);
-  } catch (error) {
-    console.error('[USER_PATCH]', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    // Only SUPER_ADMIN can update users
+    const users = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT role FROM "User" WHERE id = $1 LIMIT 1`,
+      session.userId
     );
-  }
-}
 
-// DELETE /api/users/[id] - Delete user (admin only)
-export async function DELETE(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    const session = await auth();
+    if (!users || users.length === 0 || users[0].role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+    const body = await request.json();
+    const { role, isActive, companyIds } = body;
+
+    // Update user role and active status
+    if (role !== undefined) {
+      await prisma.$queryRawUnsafe(
+        `UPDATE "User" SET role = $1 WHERE id = $2`,
+        role,
+        id
       );
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
-
-    if (!dbUser || dbUser.role !== 'SUPER_ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden: Super admin access required' },
-        { status: 403 }
+    if (isActive !== undefined) {
+      await prisma.$queryRawUnsafe(
+        `UPDATE "User" SET "isActive" = $1 WHERE id = $2`,
+        isActive,
+        id
       );
     }
 
-    const { id } = await context.params;
-
-    // Prevent deleting yourself
-    if (dbUser.id === id) {
-      return NextResponse.json(
-        { error: 'Cannot delete your own account' },
-        { status: 400 }
+    // Update company assignments
+    if (companyIds !== undefined) {
+      // Delete existing assignments
+      await prisma.$queryRawUnsafe(
+        `DELETE FROM "UserCompany" WHERE "userId" = $1`,
+        id
       );
-    }
 
-    // Company assignments will be deleted automatically due to cascade
-    await prisma.user.delete({
-      where: { id },
-    });
+      // Add new assignments
+      for (const companyId of companyIds) {
+        await prisma.$queryRawUnsafe(
+          `INSERT INTO "UserCompany" ("id", "userId", "companyId", "createdAt") VALUES (gen_random_uuid(), $1, $2, NOW())`,
+          id,
+          companyId
+        );
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[USER_DELETE]', error);
+    console.error('[USER_UPDATE_ERROR]', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: 'Failed to update user' },
       { status: 500 }
     );
   }

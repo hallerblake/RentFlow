@@ -21,7 +21,23 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    return NextResponse.json({ user: users[0] });
+    // Fetch user's companies
+    const companies = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT c.id, c.name
+       FROM "UserCompany" uc
+       JOIN "Company" c ON uc."companyId" = c.id
+       WHERE uc."userId" = $1
+       ORDER BY c.name`,
+      session.userId
+    );
+
+    return NextResponse.json({
+      user: {
+        ...users[0],
+        companies,
+        selectedCompanyId: session.selectedCompanyId,
+      },
+    });
   } catch (error) {
     console.error('[SESSION_ERROR]', error);
     return NextResponse.json({ user: null });

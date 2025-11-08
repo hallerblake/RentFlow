@@ -47,12 +47,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get user's first company assignment for selectedCompanyId
+    const userCompanies = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT c.id FROM "UserCompany" uc
+       JOIN "Company" c ON uc."companyId" = c.id
+       WHERE uc."userId" = $1
+       ORDER BY c.name
+       LIMIT 1`,
+      dbUser.id
+    );
+
     // Create session
     const session = await getSession();
     session.userId = dbUser.id;
     session.email = dbUser.email;
     session.name = dbUser.name || undefined;
     session.image = dbUser.image || undefined;
+    session.role = dbUser.role;
+    session.selectedCompanyId = userCompanies.length > 0 ? userCompanies[0].id : undefined;
     session.isLoggedIn = true;
     await session.save();
 

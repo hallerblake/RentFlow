@@ -1,90 +1,84 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useCurrentUser } from './UserContext';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
-interface Company {
+type Company = {
   id: string;
   name: string;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-}
+  phone?: string;
+};
 
-interface CompanyContextType {
+type CompanyContextType = {
   selectedCompany: Company | null;
-  setSelectedCompany: (company: Company | null) => void;
   companies: Company[];
-  setCompanies: (companies: Company[]) => void;
+  setSelectedCompany: (company: Company) => void;
   isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
-}
+};
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
-export function CompanyProvider({ children }: { children: React.ReactNode }) {
-  const { currentUser, isSuperAdmin } = useCurrentUser();
+export function CompanyProvider({ children }: { children: ReactNode }) {
   const [selectedCompany, setSelectedCompanyState] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Filter companies based on user role
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!currentUser || companies.length === 0) {
-      setFilteredCompanies([]);
-      return;
-    }
+    fetchUserData();
+  }, []);
 
-    if (isSuperAdmin) {
-      // Super admins see all companies
-      setFilteredCompanies(companies);
-    } else {
-      // Company admins and users see only their assigned companies
-      const assignedCompanyIds = currentUser.companyAssignments.map((ca) => ca.companyId);
-      const assigned = companies.filter((c) => assignedCompanyIds.includes(c.id));
-      setFilteredCompanies(assigned);
-    }
-  }, [currentUser, companies, isSuperAdmin]);
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/session');
+      const data = await response.json();
 
-  // Load selected company from localStorage on mount
-  useEffect(() => {
-    const savedCompanyId = localStorage.getItem('selectedCompanyId');
-    if (savedCompanyId && filteredCompanies.length > 0) {
-      const company = filteredCompanies.find(c => c.id === savedCompanyId);
-      if (company) {
-        setSelectedCompanyState(company);
-      } else if (filteredCompanies.length > 0) {
-        // If saved company not found, select first available
-        setSelectedCompanyState(filteredCompanies[0]);
+      if (data.user && data.user.companies) {
+        setCompanies(data.user.companies);
+
+        // Set selected company from session or first company
+        if (data.user.selectedCompanyId) {
+          const selected = data.user.companies.find(
+            (c: Company) => c.id === data.user.selectedCompanyId
+          );
+          if (selected) {
+            setSelectedCompanyState(selected);
+          } else if (data.user.companies.length > 0) {
+            setSelectedCompanyState(data.user.companies[0]);
+          }
+        } else if (data.user.companies.length > 0) {
+          setSelectedCompanyState(data.user.companies[0]);
+        }
       }
-    } else if (filteredCompanies.length > 0 && !selectedCompany) {
-      // Auto-select first company if none selected
-      setSelectedCompanyState(filteredCompanies[0]);
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [filteredCompanies]);
+  };
 
-  const setSelectedCompany = (company: Company | null) => {
-    setSelectedCompanyState(company);
-    if (company) {
-      localStorage.setItem('selectedCompanyId', company.id);
-    } else {
-      localStorage.removeItem('selectedCompanyId');
+  const setSelectedCompany = async (company: Company) => {
+    try {
+      // Update session on server
+      await fetch('/api/auth/switch-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId: company.id }),
+      });
+
+      // Update local state
+      setSelectedCompanyState(company);
+
+      // Refresh the page to reload data with new company filter
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to switch company:', error);
     }
   };
 
   return (
     <CompanyContext.Provider
-      value={{
-        selectedCompany,
-        setSelectedCompany,
-        companies: filteredCompanies,
-        setCompanies,
-        isLoading,
-        setIsLoading,
-      }}
+      value={{ selectedCompany, companies, setSelectedCompany, isLoading }}
     >
       {children}
     </CompanyContext.Provider>
