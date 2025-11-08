@@ -105,10 +105,6 @@ export default function SignInPage() {
         <Suspense fallback={<div>Loading...</div>}>
           <SignInForm />
         </Suspense>
-
-        <p className="text-center text-sm text-slate-500 mt-6">
-          Default credentials: haller.blake@gmail.com / password123
-        </p>
       </Card>
     </div>
   );
