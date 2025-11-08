@@ -16,11 +16,9 @@ type UserProfile = {
   email: string;
   role: string;
   isActive: boolean;
-  companyAssignments: {
-    company: {
-      id: string;
-      name: string;
-    };
+  companies?: {
+    id: string;
+    name: string;
   }[];
 };
 
@@ -325,14 +323,14 @@ export default function AccountPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {profile.companyAssignments.length > 0 ? (
-                  profile.companyAssignments.map((assignment) => (
+                {profile.companies && profile.companies.length > 0 ? (
+                  profile.companies.map((company) => (
                     <div
-                      key={assignment.company.id}
+                      key={company.id}
                       className="flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-200"
                     >
                       <Building2 className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium">{assignment.company.name}</span>
+                      <span className="text-sm font-medium">{company.name}</span>
                     </div>
                   ))
                 ) : (

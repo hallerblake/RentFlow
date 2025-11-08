@@ -12,7 +12,7 @@ export async function GET() {
 
     // Fetch fresh user data from database - use raw query
     const users = await prisma.$queryRawUnsafe<any[]>(
-      `SELECT id, email, name, image, role FROM "User" WHERE id = $1 LIMIT 1`,
+      `SELECT id, email, name, image, role, "isActive" FROM "User" WHERE id = $1 LIMIT 1`,
       session.userId
     );
 
