@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Building2, MapPin, Bed, Bath, Square, DollarSign, Users, Wrench, Edit, Trash2 } from 'lucide-react';
+import { Plus, Building2, MapPin, Bed, Bath, Square, DollarSign, Users, Wrench, Edit, Trash2, Image } from 'lucide-react';
 import { PropertyDialog } from '@/components/properties/PropertyDialog';
+import { PropertyImagesDialog } from '@/components/properties/PropertyImagesDialog';
 import { ViewToggle } from '@/components/ui/view-toggle';
 import {
   Table,
@@ -61,6 +62,7 @@ export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [imagesDialogOpen, setImagesDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [view, setView] = useState<'card' | 'table'>('table');
 
@@ -113,6 +115,11 @@ export default function PropertiesPage() {
   const handleEdit = (property: Property) => {
     setSelectedProperty(property);
     setDialogOpen(true);
+  };
+
+  const handleViewImages = (property: Property) => {
+    setSelectedProperty(property);
+    setImagesDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -297,21 +304,32 @@ export default function PropertiesPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3 pt-2">
+                  <div className="flex gap-2 pt-2">
                     <Button
                       variant="outline"
+                      size="sm"
+                      className="flex-1 bg-white/50 hover:bg-purple-50 border-purple-500/30 hover:border-purple-500 text-purple-600 hover:text-purple-700 transition-all duration-300"
+                      onClick={() => handleViewImages(property)}
+                    >
+                      <Image className="h-4 w-4 mr-1" />
+                      Images
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1 bg-white/50 hover:bg-white/70 border-blue-500/30 hover:border-blue-500 transition-all duration-300"
                       onClick={() => handleEdit(property)}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
                     <Button
                       variant="outline"
+                      size="sm"
                       className="flex-1 bg-white/50 hover:bg-red-50 border-red-500/30 hover:border-red-500 text-red-600 hover:text-red-700 transition-all duration-300"
                       onClick={() => handleDelete(property.id)}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4 mr-1" />
                       Delete
                     </Button>
                   </div>
@@ -399,6 +417,15 @@ export default function PropertiesPage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => handleViewImages(property)}
+                        className="h-8 bg-white/50 hover:bg-purple-50 text-purple-600 hover:text-purple-700"
+                      >
+                        <Image className="h-3 w-3 mr-1" />
+                        Images
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleEdit(property)}
                         className="h-8 bg-white/50 hover:bg-white/70"
                       >
@@ -428,6 +455,12 @@ export default function PropertiesPage() {
         onOpenChange={setDialogOpen}
         property={selectedProperty}
         onSaved={handlePropertySaved}
+      />
+
+      <PropertyImagesDialog
+        open={imagesDialogOpen}
+        onOpenChange={setImagesDialogOpen}
+        property={selectedProperty}
       />
     </div>
   );

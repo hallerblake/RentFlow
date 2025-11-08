@@ -22,6 +22,7 @@ model Company {
   // Relationships
   userAssignments     UserCompany[]
   properties          Property[]
+  propertyImages      PropertyImage[]
   tenants             Tenant[]
   payments            Payment[]
   maintenanceRequests MaintenanceRequest[]
@@ -142,6 +143,7 @@ model Property {
   units               Unit[]
   leases              Lease[]
   tenants             Tenant[]
+  propertyImages      PropertyImage[]
   maintenanceRequests MaintenanceRequest[]
   payments            Payment[]
   expenses            Expense[]
@@ -312,6 +314,24 @@ model SmsTemplate {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Property Images
+model PropertyImage {
+  id         String   @id @default(cuid())
+  companyId  String   // For multi-tenant isolation
+  propertyId String
+  url        String   // Vercel Blob URL
+  fileName   String
+  fileSize   Int      // In bytes
+  mimeType   String
+  isPrimary  Boolean  @default(false) // Mark one image as primary/featured
+
+  // Relationships
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 // Expense Tracking
