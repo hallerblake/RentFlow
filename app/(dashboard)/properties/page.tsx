@@ -62,7 +62,7 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [view, setView] = useState<'card' | 'table'>('card');
+  const [view, setView] = useState<'card' | 'table'>('table');
 
   useEffect(() => {
     // Load view preference from localStorage

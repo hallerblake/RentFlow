@@ -197,12 +197,12 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSaved }: ExpenseD
 
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">Payment Method</Label>
-              <Select onValueChange={(value) => setValue('paymentMethod', value)} defaultValue={expense?.paymentMethod || ''}>
+              <Select onValueChange={(value) => setValue('paymentMethod', value === 'NONE' ? '' : value)} defaultValue={expense?.paymentMethod || 'NONE'}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select method (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Not specified</SelectItem>
+                  <SelectItem value="NONE">Not specified</SelectItem>
                   <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="CHECK">Check</SelectItem>
                   <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
@@ -216,12 +216,12 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSaved }: ExpenseD
 
           <div className="space-y-2">
             <Label htmlFor="propertyId">Property (optional)</Label>
-            <Select onValueChange={(value) => setValue('propertyId', value)} defaultValue={expense?.property?.id || ''}>
+            <Select onValueChange={(value) => setValue('propertyId', value === 'NONE' ? '' : value)} defaultValue={expense?.property?.id || 'NONE'}>
               <SelectTrigger>
                 <SelectValue placeholder="General expense (no property)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">General expense</SelectItem>
+                <SelectItem value="NONE">General expense</SelectItem>
                 {properties.map((property) => (
                   <SelectItem key={property.id} value={property.id}>
                     {property.name} - {property.address}
