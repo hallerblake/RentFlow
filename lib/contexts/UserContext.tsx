@@ -40,14 +40,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const isLoading = status === 'loading';
 
+  // Simplified user object - will be enhanced with database data later
   const currentUser = session?.user ? {
     id: session.user.id,
     email: session.user.email!,
     name: session.user.name,
     image: session.user.image,
-    role: session.user.role,
-    isActive: session.user.isActive,
-    companyAssignments: session.user.companyAssignments,
+    role: 'USER' as UserRole, // Default role, will be fetched from DB
+    isActive: true, // Default to active
+    companyAssignments: [], // Will be fetched from DB
   } : null;
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
