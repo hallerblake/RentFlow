@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header';
 import { SessionProvider } from 'next-auth/react';
 import { UserProvider } from '@/lib/contexts/UserContext';
 import { CompanyProvider } from '@/lib/contexts/CompanyContext';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function DashboardLayout({
   children,
@@ -24,6 +25,7 @@ export default function DashboardLayout({
               </main>
             </div>
           </div>
+          <Toaster />
         </CompanyProvider>
       </UserProvider>
     </SessionProvider>

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Search, Bell, ChevronDown, User, Settings, HelpCircle, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
@@ -12,6 +14,13 @@ import {
 import { CompanySwitcher } from '@/components/company/CompanySwitcher';
 
 export default function Header() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/sign-in');
+  };
+
   return (
     <header className="sticky top-0 z-40 h-16 bg-white border-b border-slate-200">
       <div className="flex items-center justify-between h-full px-6">
@@ -47,7 +56,7 @@ export default function Header() {
                 <ChevronDown className="w-4 h-4 text-slate-400" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 p-3" align="end">
+            <DropdownMenuContent className="w-80 p-3 bg-white border border-slate-200 shadow-lg" align="end">
               {/* User Info Header */}
               <div className="flex items-center gap-3 px-2 py-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
@@ -72,15 +81,19 @@ export default function Header() {
               <DropdownMenuSeparator />
 
               {/* Menu Items */}
-              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
-                <User className="w-4 h-4 text-slate-600" />
-                <span className="text-sm">My Profile</span>
-              </DropdownMenuItem>
+              <Link href="/account">
+                <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
+                  <User className="w-4 h-4 text-slate-600" />
+                  <span className="text-sm">My Account</span>
+                </DropdownMenuItem>
+              </Link>
 
-              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
-                <Settings className="w-4 h-4 text-slate-600" />
-                <span className="text-sm">Account Settings</span>
-              </DropdownMenuItem>
+              <Link href="/settings">
+                <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
+                  <Settings className="w-4 h-4 text-slate-600" />
+                  <span className="text-sm">Settings</span>
+                </DropdownMenuItem>
+              </Link>
 
               <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md">
                 <HelpCircle className="w-4 h-4 text-slate-600" />
@@ -89,7 +102,10 @@ export default function Header() {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md text-red-600 hover:text-red-700 hover:bg-red-50">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
                 <LogOut className="w-4 h-4" />
                 <span className="text-sm font-medium">Log out</span>
               </DropdownMenuItem>

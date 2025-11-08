@@ -27,6 +27,8 @@ model Company {
   maintenanceRequests MaintenanceRequest[]
   smsReminders        SmsReminder[]
   smsTemplates        SmsTemplate[]
+  expenseCategories   ExpenseCategory[]
+  expenses            Expense[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -142,6 +144,7 @@ model Property {
   tenants             Tenant[]
   maintenanceRequests MaintenanceRequest[]
   payments            Payment[]
+  expenses            Expense[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -306,6 +309,44 @@ model SmsTemplate {
 
   // Relationships
   company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Expense Tracking
+model ExpenseCategory {
+  id        String  @id @default(cuid())
+  companyId String
+  name      String
+  isDefault Boolean @default(false) // Prepopulated categories
+
+  // Relationships
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, name])
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  companyId     String
+  propertyId    String? // Optional - expense can be property-specific or general
+  categoryId    String
+  amount        Float
+  date          DateTime @default(now())
+  vendor        String? // Payee/vendor name
+  paymentMethod String? // cash, check, credit_card, bank_transfer, etc.
+  description   String?
+  receiptUrl    String? // Future: URL to uploaded receipt
+
+  // Relationships
+  company  Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  property Property?        @relation(fields: [propertyId], references: [id])
+  category ExpenseCategory @relation(fields: [categoryId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

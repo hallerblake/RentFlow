@@ -11,6 +11,7 @@ import {
   Wrench,
   MessageSquare,
   Settings,
+  Receipt,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/lib/contexts/UserContext';
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Properties', href: '/properties', icon: Building2 },
   { name: 'Tenants', href: '/tenants', icon: Users },
   { name: 'Payments', href: '/payments', icon: DollarSign, badge: 3 },
+  { name: 'Expenses', href: '/expenses', icon: Receipt },
   { name: 'Maintenance', href: '/maintenance', icon: Wrench, badge: 2 },
   { name: 'SMS', href: '/sms', icon: MessageSquare },
   { name: 'Users', href: '/users', icon: UserCog, adminOnly: true },
