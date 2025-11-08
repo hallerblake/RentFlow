@@ -8,20 +8,11 @@ async function setPassword() {
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Update or create user
-  const user = await prisma.user.upsert({
+  // Update user with password (user should already exist)
+  const user = await prisma.user.update({
     where: { email },
-    update: {
+    data: {
       password: hashedPassword,
-      role: 'SUPER_ADMIN',
-      isActive: true,
-    },
-    create: {
-      email,
-      name: 'Blake Haller',
-      password: hashedPassword,
-      role: 'SUPER_ADMIN',
-      isActive: true,
     },
   });
 

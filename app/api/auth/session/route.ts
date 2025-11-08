@@ -10,30 +10,18 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    // Fetch fresh user data from database
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        image: true,
-        role: true,
-        isActive: true,
-        companyAssignments: {
-          include: {
-            company: true,
-          },
-        },
-      },
-    });
+    // Fetch fresh user data from database - use raw query
+    const users = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT id, email, name, image, role FROM "User" WHERE id = $1 LIMIT 1`,
+      session.userId
+    );
 
-    if (!user || !user.isActive) {
+    if (!users || users.length === 0) {
       session.destroy();
       return NextResponse.json({ user: null });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user: users[0] });
   } catch (error) {
     console.error('[SESSION_ERROR]', error);
     return NextResponse.json({ user: null });

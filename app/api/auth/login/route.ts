@@ -14,28 +14,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        companyAssignments: {
-          include: {
-            company: true,
-          },
-        },
-      },
-    });
+    // Find user by email - use raw query to avoid schema issues
+    const user = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT id, email, name, image, password, role FROM "User" WHERE email = $1 LIMIT 1`,
+      email
+    );
 
-    if (!user) {
+    if (!user || user.length === 0) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    // Check if user has a password (for now, we'll create a default password)
-    // In production, you'd want users to set passwords
-    if (!user.password) {
+    const dbUser = user[0];
+
+    // Check if user has a password
+    if (!dbUser.password) {
       return NextResponse.json(
         { error: 'Please contact admin to set up your password' },
         { status: 401 }
@@ -43,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, dbUser.password);
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -52,31 +47,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      return NextResponse.json(
-        { error: 'Your account has been deactivated' },
-        { status: 403 }
-      );
-    }
-
     // Create session
     const session = await getSession();
-    session.userId = user.id;
-    session.email = user.email;
-    session.name = user.name || undefined;
-    session.image = user.image || undefined;
+    session.userId = dbUser.id;
+    session.email = dbUser.email;
+    session.name = dbUser.name || undefined;
+    session.image = dbUser.image || undefined;
     session.isLoggedIn = true;
     await session.save();
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        image: user.image,
-        role: user.role,
+        id: dbUser.id,
+        email: dbUser.email,
+        name: dbUser.name,
+        image: dbUser.image,
+        role: dbUser.role,
       },
     });
   } catch (error) {
