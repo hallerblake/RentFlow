@@ -40,24 +40,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       // Check if user exists and is active
+      // Note: On first sign-in, user won't exist yet (PrismaAdapter creates them after this callback)
       if (user.email) {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
         });
 
-        // If user exists but is inactive, deny sign-in
-        if (existingUser && !existingUser.isActive) {
-          return false;
-        }
+        // Only check isActive if user already exists
+        // If user doesn't exist, allow sign-in (they'll be created by PrismaAdapter)
+        if (existingUser) {
+          // Deny sign-in if user exists but is inactive
+          if (!existingUser.isActive) {
+            console.log(`Sign-in denied for inactive user: ${user.email}`);
+            return false;
+          }
 
-        // Set SUPER_ADMIN role for specific email
-        if (user.email === 'haller.blake@gmail.com' && existingUser && existingUser.role !== 'SUPER_ADMIN') {
-          await prisma.user.update({
-            where: { email: user.email },
-            data: { role: 'SUPER_ADMIN' },
-          });
+          // Set SUPER_ADMIN role for specific email on subsequent sign-ins
+          if (user.email === 'haller.blake@gmail.com' && existingUser.role !== 'SUPER_ADMIN') {
+            await prisma.user.update({
+              where: { email: user.email },
+              data: { role: 'SUPER_ADMIN' },
+            });
+          }
+        } else {
+          // User doesn't exist yet - will be created by PrismaAdapter
+          console.log(`New user signing in: ${user.email}`);
         }
       }
       return true;
