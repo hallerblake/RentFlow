@@ -143,7 +143,7 @@ export function MaintenanceDialog({ open, onOpenChange, request, onSaved }: Main
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle>{request ? 'Edit Maintenance Request' : 'New Maintenance Request'}</DialogTitle>
         </DialogHeader>

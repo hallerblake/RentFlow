@@ -109,7 +109,7 @@ export function PropertyDialog({ open, onOpenChange, property, onSaved }: Proper
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle>{property ? 'Edit Property' : 'Add New Property'}</DialogTitle>
         </DialogHeader>
