@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/lib/contexts/UserContext';
+import { useCompany } from '@/lib/contexts/CompanyContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -29,6 +30,7 @@ const navigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isSuperAdmin, isCompanyAdmin } = useCurrentUser();
+  const { selectedCompany } = useCompany();
 
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
@@ -61,9 +63,11 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-900 truncate">
-              Haller Properties
+              {selectedCompany?.name || 'No Company Selected'}
             </p>
-            <p className="text-xs text-slate-500">555-0200</p>
+            {selectedCompany?.phone && (
+              <p className="text-xs text-slate-500">{selectedCompany.phone}</p>
+            )}
           </div>
         </div>
       </div>

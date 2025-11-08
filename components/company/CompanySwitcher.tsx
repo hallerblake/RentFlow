@@ -65,7 +65,7 @@ export function CompanySwitcher() {
           <ChevronsUpDown className="h-4 w-4 text-slate-400 flex-shrink-0" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-72 p-2 rounded-lg" align="start">
+      <DropdownMenuContent className="w-72 p-2 rounded-lg bg-white border border-slate-200 shadow-lg" align="start">
         <DropdownMenuLabel className="text-xs font-semibold text-slate-600 uppercase tracking-wide px-2 mb-1">
           Switch Company
         </DropdownMenuLabel>

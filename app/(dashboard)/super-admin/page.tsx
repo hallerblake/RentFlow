@@ -258,7 +258,7 @@ export default function SuperAdminPage() {
 
       {/* Edit User Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white">
           <DialogHeader>
             <DialogTitle>Edit User: {editUser?.email}</DialogTitle>
           </DialogHeader>
