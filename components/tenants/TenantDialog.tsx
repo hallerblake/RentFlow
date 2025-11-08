@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -66,7 +66,7 @@ export function TenantDialog({ open, onOpenChange, tenant, onSaved }: TenantDial
   useEffect(() => {
     if (tenant) {
       setValue('companyId', tenant.company.id);
-      setValue('propertyId', tenant.property?.id || '');
+      setValue('propertyId', tenant.property?.id || 'NONE');
       setValue('firstName', tenant.firstName);
       setValue('lastName', tenant.lastName);
       setValue('email', tenant.email);
@@ -139,6 +139,9 @@ export function TenantDialog({ open, onOpenChange, tenant, onSaved }: TenantDial
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle>{tenant ? 'Edit Tenant' : 'Add New Tenant'}</DialogTitle>
+          <DialogDescription>
+            {tenant ? 'Update the tenant details below' : 'Enter the tenant information below'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -185,12 +188,12 @@ export function TenantDialog({ open, onOpenChange, tenant, onSaved }: TenantDial
 
             <div className="space-y-2">
               <Label htmlFor="propertyId">Property</Label>
-              <Select onValueChange={(value) => setValue('propertyId', value)} defaultValue={tenant?.property?.id || ''}>
+              <Select onValueChange={(value) => setValue('propertyId', value === 'NONE' ? '' : value)} defaultValue={tenant?.property?.id || 'NONE'}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select property" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No property assigned</SelectItem>
+                  <SelectItem value="NONE">No property assigned</SelectItem>
                   {properties.map((property) => (
                     <SelectItem key={property.id} value={property.id}>
                       {property.name} - {property.address}
