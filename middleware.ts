@@ -1,9 +1,10 @@
-import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getIronSession } from 'iron-session';
+import { SessionData, sessionOptions } from '@/lib/session';
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
   // Public routes that don't require authentication
   const publicRoutes = ['/sign-in', '/api/auth', '/api/test-env'];
@@ -13,15 +14,21 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  // Check session
+  const response = NextResponse.next();
+  const session = await getIronSession<SessionData>(request, response, sessionOptions);
+
+  const isLoggedIn = session.isLoggedIn && session.userId;
+
   // Redirect to sign-in if not authenticated
   if (!isLoggedIn) {
-    const signInUrl = new URL('/sign-in', req.url);
+    const signInUrl = new URL('/sign-in', request.url);
     signInUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(signInUrl);
   }
 
-  return NextResponse.next();
-});
+  return response;
+}
 
 export const config = {
   matcher: [

@@ -43,6 +43,7 @@ model User {
   // Custom fields for our app
   firstName     String?
   lastName      String?
+  password      String?   // Hashed password for local auth
   role          UserRole  @default(USER)
   isActive      Boolean   @default(true)
 
