@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 // GET - List all expenses for the selected company
 export async function GET(request: NextRequest) {
