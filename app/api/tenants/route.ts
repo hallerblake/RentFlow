@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 
 // GET /api/tenants - List all tenants
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSession();
     const searchParams = request.nextUrl.searchParams;
-    const companyId = searchParams.get('companyId');
+    const companyIdParam = searchParams.get('companyId');
     const propertyId = searchParams.get('propertyId');
+
+    // Use selectedCompanyId from session, or fall back to query parameter
+    const companyId = session.selectedCompanyId || companyIdParam;
+
+    // If user is not SUPER_ADMIN and no company is selected, return error
+    if (!companyId && session.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: 'No company selected' },
+        { status: 400 }
+      );
+    }
 
     const where: any = {};
     if (companyId) where.companyId = companyId;

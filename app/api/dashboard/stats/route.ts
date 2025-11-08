@@ -1,17 +1,36 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const session = await getSession();
+    const searchParams = request.nextUrl.searchParams;
+    const companyIdParam = searchParams.get('companyId');
+
+    // Use selectedCompanyId from session, or fall back to query parameter
+    const companyId = session.selectedCompanyId || companyIdParam;
+
+    // If user is not SUPER_ADMIN and no company is selected, return error
+    if (!companyId && session.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: 'No company selected' },
+        { status: 400 }
+      );
+    }
+
+    const where = companyId ? { companyId } : {};
+
     // Test database connection first
     await prisma.$connect();
 
     // Get total properties count
-    const propertiesCount = await prisma.property.count();
+    const propertiesCount = await prisma.property.count({ where });
 
     // Get occupied properties count (properties with active tenants)
     const occupiedCount = await prisma.property.count({
       where: {
+        ...where,
         tenants: {
           some: {
             isActive: true,
@@ -27,6 +46,7 @@ export async function GET() {
 
     const monthlyPayments = await prisma.payment.findMany({
       where: {
+        ...where,
         status: 'PAID',
         paidDate: {
           gte: startOfMonth,
@@ -40,6 +60,7 @@ export async function GET() {
     // Get pending maintenance requests count
     const pendingMaintenance = await prisma.maintenanceRequest.count({
       where: {
+        ...where,
         status: {
           in: ['REQUESTED', 'IN_PROGRESS'],
         },
@@ -49,6 +70,7 @@ export async function GET() {
     // Get urgent maintenance count
     const urgentMaintenance = await prisma.maintenanceRequest.count({
       where: {
+        ...where,
         priority: 'URGENT',
         status: {
           in: ['REQUESTED', 'IN_PROGRESS'],
@@ -62,6 +84,7 @@ export async function GET() {
 
     const upcomingPayments = await prisma.payment.findMany({
       where: {
+        ...where,
         status: 'PENDING',
         dueDate: {
           gte: now,
@@ -90,6 +113,7 @@ export async function GET() {
     // Get recent activity (last 10 payments, maintenance requests, etc.)
     const recentPayments = await prisma.payment.findMany({
       where: {
+        ...where,
         status: 'PAID',
       },
       include: {
@@ -107,6 +131,7 @@ export async function GET() {
     });
 
     const recentMaintenance = await prisma.maintenanceRequest.findMany({
+      where,
       include: {
         property: {
           select: {
