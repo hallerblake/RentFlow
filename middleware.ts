@@ -30,6 +30,3 @@ export const config = {
     '/(api|trpc)((?!/auth).*)',
   ],
 };
-
-// Force Node.js runtime for middleware (required for Prisma)
-export const runtime = 'nodejs';
