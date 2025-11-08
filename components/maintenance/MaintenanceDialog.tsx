@@ -67,7 +67,7 @@ export function MaintenanceDialog({ open, onOpenChange, request, onSaved }: Main
     if (request) {
       setValue('companyId', request.company.id);
       setValue('propertyId', request.property.id);
-      setValue('tenantId', request.tenant?.id || '');
+      setValue('tenantId', request.tenant?.id || 'none');
       setValue('title', request.title);
       setValue('description', request.description);
       setValue('priority', request.priority);
@@ -77,6 +77,7 @@ export function MaintenanceDialog({ open, onOpenChange, request, onSaved }: Main
         companyId: companies[0]?.id || '',
         priority: 'MEDIUM',
         status: 'REQUESTED',
+        tenantId: 'none',
       });
     }
   }, [request, companies, setValue, reset]);
@@ -184,12 +185,12 @@ export function MaintenanceDialog({ open, onOpenChange, request, onSaved }: Main
 
           <div className="space-y-2">
             <Label htmlFor="tenantId">Tenant</Label>
-            <Select onValueChange={(value) => setValue('tenantId', value)} defaultValue={request?.tenant?.id || ''}>
+            <Select onValueChange={(value) => setValue('tenantId', value === 'none' ? '' : value)} defaultValue={request?.tenant?.id || 'none'}>
               <SelectTrigger>
                 <SelectValue placeholder="Select tenant (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No tenant</SelectItem>
+                <SelectItem value="none">No tenant</SelectItem>
                 {tenants.map((tenant) => (
                   <SelectItem key={tenant.id} value={tenant.id}>
                     {tenant.firstName} {tenant.lastName}
